@@ -12,56 +12,10 @@ pre=f"{kind}_p.png"
 mid=f"{kind}_m.png"
 back=f"{kind}_b.png"
 def main():
-  #設定ファイルの読み込み(クエスト、難易度等)
-  with open('config.yaml', 'r') as file:
-      config = yaml.load(file, Loader=yaml.SafeLoader)
-
-  #3垢起動~各Noxへのコントローラーの作成
-  sub_accounts_controller=sub_account_start()
-  sub_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2])
-  
-
-  for i in range(3,6):#本アカ3種類
-    #本アカのNox起動~コントローラーの作成
-    main_accounts_controller=main_account_start(i)
-
-    #本アカのアプリ起動～ホーム画面まで
-    main_accounts_controller.app_start()
-    all_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2],main_accounts_controller)
-    others_devices_multi_controller=[Nox_devices(sub_accounts_controller[1],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],main_accounts_controller)]
-    start2home(main_accounts_controller)
-
-    for j in range(30): #３０回繰り返し
-      #サブ垢のアプリデータ入れ替え~ホーム画面まで
-      sleep(2)
-      sub_multi_controller.chage(i-2,j)
-      sleep(1)
-      sub_multi_controller.app_start()
-      start2home(sub_multi_controller)
-      for k in range(3): #クエストを三回繰り返す
-        pass
-        #クエスト選択
-        kue_select(sub_accounts_controller[k])
-
-        #難易度選択~出陣待ち
-        wait_go(sub_accounts_controller[k])
-
-        #他3垢の参加
-        join(others_devices_multi_controller[k])
-
-        #出陣~クエスト終了
-        while not (sub_accounts_controller[k].is_img("torikesi.png",0.9)):
-          pass
-        sub_accounts_controller[k].touch(sub_accounts_controller[k].x+210) #スタート
-        sleep(3)
-        sub_accounts_controller[k].touch(180,650) #"はい"があったと時用
-        shot(all_multi_controller) #クエストクリアまで撃つ
-
-        #ホーム画面まで戻る
-        clear(all_multi_controller)
-      
-      #アプリを終了
-      sub_multi_controller.app_end()
+    sub_multi_controller=Nox_devices(Nox('127.0.0.1:62001'),Nox('127.0.0.1:62025'))
+    s=Nox('127.0.0.1:62001')
+    print("aaaaa")
+    clear(sub_multi_controller)
 
 
 
@@ -81,6 +35,7 @@ def main_account_start(i):
   return Nox(Noxs[0])
 
 def start2home(dev):
+
   if is_list(dev.is_img("home.png",0.9)):
     while (False in dev.is_img("home.png",0.9)):
       dev.img_touch("consent.png",0.9)
@@ -99,7 +54,7 @@ def start2home(dev):
       dev.touch(300,400)    
   sleep(3)
   dev.touch(50,950)
-
+  
 def kue_select(dev):
   """if is_list(dev.is_img("home.png",0.9)):
     while (False in dev.is_img("asobikata.png",0.9)):
@@ -112,7 +67,7 @@ def kue_select(dev):
       for i,flag in enumerate(dev.is_img("marutisanka.png",0.9)):
         if flag:
           dev.devices[i].touch(dev.devices[i].x-120,dev.devices[i].y)
-    while (False in dev.is_img(kue,0.9)):
+    while (False in dev.img_touch(kue,0.9)):
       dev.img_touch("ok1kai.png",0.9)
       dev.img_touch("kueok.png",0.9)
       for i,flag in enumerate(dev.is_img("sixyousai.png",0.9)):
@@ -149,7 +104,7 @@ def wait_go(dev):
   while not (dev.is_img("sixyutugeki.png",0.9)):
     pass
   dev.touch()
-
+  
 def join(dev):
   if is_list(dev.is_img("torikesi.png",0.9)):
     while (False in dev.is_img("torikesi.png",0.9)):
@@ -206,12 +161,7 @@ def clear(dev):
     while not (dev.is_img("home.png",0.9)):
       dev.touch(300,450)
       dev.img_touch("ok_clear.png",0.9)
-
 main()
 
-
-
-
-    
 
 
