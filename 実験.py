@@ -3,10 +3,12 @@ from time import sleep
 import random
 import yaml
 #yaml-----------
-kue="ibekue.png"
-genre="ibe.png"
-kind="ibe"
-difficulty="kixyuukixyoku.png"
+with open("config.yaml", "r", encoding="utf-8") as f:
+    data = yaml.load(f, Loader=yaml.SafeLoader)
+kue=data["kue"]
+genre=data["genre"]
+kind=data["kind"]
+difficulty=data["difficulty"]
 #yaml-----------
 pre=f"{kind}_p.png"
 mid=f"{kind}_m.png"

@@ -3,10 +3,12 @@ from time import sleep
 import random
 import yaml
 #yaml-----------
-kue="ibekue.png"
-genre="ibe.png"
-kind="ibe"
-difficulty="kixyuukixyoku.png"
+with open("config.yaml", "r", encoding="utf-8") as f:
+    data = yaml.load(f, Loader=yaml.SafeLoader)
+kue=data["kue"]
+genre=data["genre"]
+kind=data["kind"]
+difficulty=data["difficulty"]
 #yaml-----------
 pre=f"{kind}_p.png"
 mid=f"{kind}_m.png"
@@ -21,7 +23,7 @@ def main():
   sub_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2])
   
 
-  for i in range(3,6):#本アカ3種類
+  for i in range((data["i"]+2),6):#本アカ3種類
     #本アカのNox起動~コントローラーの作成
     main_accounts_controller=main_account_start(i)
 
@@ -31,7 +33,7 @@ def main():
     others_devices_multi_controller=[Nox_devices(sub_accounts_controller[1],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],main_accounts_controller)]
     start2home(main_accounts_controller)
 
-    for j in range(30): #３０回繰り返し
+    for j in range(data["j"],30): #３０回繰り返し
       #サブ垢のアプリデータ入れ替え~ホーム画面まで
       sleep(2)
       sub_multi_controller.chage(i-2,j*3)
@@ -62,6 +64,7 @@ def main():
       
       #アプリを終了
       sub_multi_controller.app_end()
+      print(f"終了、i={i}、j={j}")
 
 
 
