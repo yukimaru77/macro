@@ -151,14 +151,14 @@ class Nox():
     def is_img(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False):
       #print("aaaaaaaaaaaa",self.id)
       if  path is not self.pics:
-        template = cv2.imread(path)
+        template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         self.pics.update({path : template})
       else:
         template = self.pics[path]
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
-      subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png", shell=True)
-      img_rgb = cv2.imread('screen.png').crop((x1, y1, x2, y2))
+      subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
+      img_rgb = cv2.imread('pictures/screen.png').crop((x1, y1, x2, y2))
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
       #print(path)
 
@@ -182,14 +182,14 @@ class Nox():
     def img_touch(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False,sleep_time=0.5):
       #print("aaaaaaaaaaaa",self.id)
       if  path is not self.pics:
-        template = cv2.imread(path)
+        template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         self.pics.update({path : template})
       else:
         template = self.pics[path]
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
-      subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png", shell=True)
-      img_rgb = cv2.imread('screen.png').crop((x1, y1, x2, y2))
+      subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
+      img_rgb = cv2.imread("pictures/"+'screen.png').crop((x1, y1, x2, y2))
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
       #print(path)
       res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
