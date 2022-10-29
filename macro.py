@@ -149,17 +149,18 @@ class Nox():
               self.x,self.y=[0,0]
               return False"""
     def is_img(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False):
-      #print("aaaaaaaaaaaa",self.id)
-      if  path is not self.pics:
+      print(len(Nox.pics))
+      if  path is not Nox.pics:
         template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        self.pics.update({path : template})
+        Nox.pics.update({path : template})
       else:
-        template = self.pics[path]
+        template = Nox.pics[path]
+        print("キャッシュ")
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
       subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
       img_rgb = cv2.imread("pictures/"+'screen.png')
-      img_rgb = img_rgb[y1:(y2-y1), x1:(x2-x1)]
+      img_rgb = img_rgb[y1:y2, x1:x2, : ]
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
       #print(path)
 
@@ -181,17 +182,18 @@ class Nox():
           return False
 
     def img_touch(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False,sleep_time=0.5):
-      #print("aaaaaaaaaaaa",self.id)
-      if  path is not self.pics:
+      print(len(Nox.pics))
+      if  path is not Nox.pics:
         template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        self.pics.update({path : template})
+        Nox.pics.update({path : template})
       else:
-        template = self.pics[path]
+        template = Nox.pics[path]
+        print("キャッシュ")
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
       subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
       img_rgb = cv2.imread("pictures/"+'screen.png')
-      img_rgb = img_rgb[y1:(y2-y1), x1:(x2-x1)]
+      img_rgb = img_rgb[y1:y2, x1:x2, : ]
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
       #print(path)
       res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
@@ -216,9 +218,9 @@ class Nox_devices():
     def __init__(self,*args):
        self.devices=args
     
-    def touch(self,x=-100,y=-100,t=60):
+    def touch(self,x=-100,y=-100,t=60,sleep_time=0.5):
         for i in self.devices:
-          i.touch(x,y,t)
+          i.touch(x,y,t,sleep_time)
     def swipe(self,x1,y1,x2,y2,t):
         for i in self.devices:
           i.swipe(x1,y1,x2,y2,t)
