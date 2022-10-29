@@ -29,6 +29,7 @@ def get_devices_id(*args):
     return Nox_Ids
 
 class Nox():
+    pics={}
     def __init__(self, id):
         self.id=id
         self.x=0
@@ -147,13 +148,17 @@ class Nox():
           else:
               self.x,self.y=[0,0]
               return False"""
-    def is_img(self,path,threshold,center=False):
+    def is_img(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False):
       #print("aaaaaaaaaaaa",self.id)
-      template = cv2.imread(path)
-      template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+      if  path is not self.pics:
+        template = cv2.imread(path)
+        template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        self.pics.update({path : template})
+      else:
+        template = self.pics[path]
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
       subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png", shell=True)
-      img_rgb = cv2.imread('screen.png')
+      img_rgb = cv2.imread('screen.png').crop((x1, y1, x2, y2))
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
       #print(path)
 
@@ -165,22 +170,26 @@ class Nox():
           for pt in zip(*loc):
             if center==False:
               h, w = template.shape
-              self.x,self.y=pt[0]+w/2,pt[1]+h/2
+              self.x,self.y=pt[0]+w/2+x1,pt[1]+h/2+y1
             else:
-              self.x,self.y=pt
+              self.x,self.y=pt[0]+x1,pt[1]+y1
             break
           return True
       else:
           self.x,self.y=[0,0]
           return False
 
-    def img_touch(self,path,threshold,center=False,sleep_time=0.5):
+    def img_touch(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False,sleep_time=0.5):
       #print("aaaaaaaaaaaa",self.id)
-      template = cv2.imread(path)
-      template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+      if  path is not self.pics:
+        template = cv2.imread(path)
+        template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        self.pics.update({path : template})
+      else:
+        template = self.pics[path]
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
       subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png", shell=True)
-      img_rgb = cv2.imread('screen.png')
+      img_rgb = cv2.imread('screen.png').crop((x1, y1, x2, y2))
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
       #print(path)
       res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
@@ -191,9 +200,9 @@ class Nox():
           for pt in zip(*loc):
             if center==False:
               h, w = template.shape
-              self.x,self.y=pt[0]+w/2,pt[1]+h/2
+              self.x,self.y=pt[0]+w/2+x1,pt[1]+h/2+y1
             else:
-              self.x,self.y=pt
+              self.x,self.y=pt[0]+x1,pt[1]+y1
             break
           self.touch(sleep_time=sleep_time)
           return True
@@ -230,13 +239,13 @@ class Nox_devices():
     def send_event_from_file(self, path):
         for i in self.devices:
           i.send_event_from_file(path)      
-    def is_img(self,path,threshold,center=False):
+    def is_img(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False):
         check=[]
         for i in self.devices:
-          check.append(i.is_img(path,threshold,center))
+          check.append(i.is_img(path,threshold,x1,y1,x2,y2,center))
         return check    
-    def img_touch(self,path,threshold,center=False,sleep_time=0.5):
+    def img_touch(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False,sleep_time=0.5):
         check=[]
         for i in self.devices:
-          check.append(i.img_touch(path,threshold,center,sleep_time))
+          check.append(i.img_touch(path,threshold,x1,y1,x2,y2,center,sleep_time))
         return check   
