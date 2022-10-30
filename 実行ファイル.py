@@ -5,25 +5,25 @@ import yaml
 #yaml-----------
 with open("config.yaml", "r", encoding="utf-8") as f:
     data = yaml.load(f, Loader=yaml.SafeLoader)
-kue=data["kue"]
-genre=data["genre"]
-kind=data["kind"]
-difficulty=data["difficulty"]
+kue="monbikue.png"
+genre="normal.png"
+kind="kame"
+difficulty="zixyou.png"
 #yaml-----------
 pre=f"{kind}_p.png"
 mid=f"{kind}_m.png"
 back=f"{kind}_b.png"
 def main():
   #設定ファイルの読み込み(クエスト、難易度等)
-  with open('config.yaml', 'r') as file:
-      config = yaml.load(file, Loader=yaml.SafeLoader)
+  """with open('config.yaml', 'r') as file:
+      config = yaml.load(file, Loader=yaml.SafeLoader)"""
 
   #3垢起動~各Noxへのコントローラーの作成
   sub_accounts_controller=sub_account_start()
   sub_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2])
   
 
-  for i in range((data["i"]+2),6):#本アカ3種類
+  for i in range((1+2),6):#本アカ3種類
     #本アカのNox起動~コントローラーの作成
     main_accounts_controller=main_account_start(i)
 
@@ -33,7 +33,7 @@ def main():
     others_devices_multi_controller=[Nox_devices(sub_accounts_controller[1],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],main_accounts_controller)]
     start2home(main_accounts_controller)
 
-    for j in range(data["j"],30): #３０回繰り返し
+    for j in range(6,30): #３０回繰り返し
       #サブ垢のアプリデータ入れ替え~ホーム画面まで
       sleep(2)
       sub_multi_controller.chage(i-2,j*3)
@@ -52,7 +52,7 @@ def main():
         join(others_devices_multi_controller[k])
 
         #出陣~クエスト終了
-        while not (sub_accounts_controller[k].is_img("torikesi.png",0.9,x2=200,y1=750,y2=900,y1=700,x2=500)):
+        while not (sub_accounts_controller[k].is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
           pass
         sub_accounts_controller[k].touch(sub_accounts_controller[k].x+210) #スタート
         sleep(3)
