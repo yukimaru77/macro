@@ -1,0 +1,6 @@
+kue : "monbikue.png" #クエストの画像
+genre : "normal.png" # normal.pngかibe.png
+kind : "kame" # ibeかkameなのか(n、m、p)
+difficulty : "zixyou.png" #難易度
+i : 1 #何週目
+j : 0 #何垢目
