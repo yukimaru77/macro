@@ -43,8 +43,8 @@ def main():
         for index,TF in enumerate(judge):
           if (TF):
             sub_accounts_controller[index].touch(300,300)
-            sub_accounts_controller[index].img_touch("uketoru.png",0.9,x1=200,y1=600,x2=400,y2=900)
-            if(sub_accounts_controller[index].is_img("uketoru.png",0.9,x1=30,y1=780,x2=190,y2=860)):
+            sub_accounts_controller[index].img_touch("uketori.png",0.9,x1=200,y1=600,x2=400,y2=900)
+            if(sub_accounts_controller[index].is_img("uketori.png",0.9,x1=30,y1=780,x2=190,y2=860)):
               judge[index]=False
       sub_multi_controller.touch(50,950)
       sleep(3)
