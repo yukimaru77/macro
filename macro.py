@@ -222,6 +222,7 @@ class Nox():
         subprocess.call(f'adb -s {self.id} pull  "{device}data13.bin" "{local}"', shell=True)
         subprocess.call(f'adb -s {self.id} pull  "{device}data14.bin" "{local}"', shell=True)
         subprocess.call(f'adb -s {self.id} pull  "{device}data16.bin" "{local}"', shell=True)
+
 class Nox_devices():
     def __init__(self,*args):
        self.devices=args
@@ -251,6 +252,10 @@ class Nox_devices():
         for i in self.devices:
           i.send_file(local_file_path, device_file_path)
     def chage(self,i,j):      
+        for k in self.devices:
+          k.chage(i,j)
+          j=j+1 #binをずらす
+    def pull(self,i,j):      
         for k in self.devices:
           k.chage(i,j)
           j=j+1 #binをずらす
