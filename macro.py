@@ -214,7 +214,14 @@ class Nox():
           self.x,self.y=[0,0]
           return False
 
-
+    def pull(self,i,j):
+        local="C:\\Users\\yukit\\data_re\\data{i}\\{j}"
+        device="/data/data/jp.co.mixi.monsterstrike/"
+        subprocess.call(f'adb -s {self.id} pull  "{device}data10.bin" "{local}"', shell=True)
+        subprocess.call(f'adb -s {self.id} pull  "{device}data11.bin" "{local}"', shell=True)
+        subprocess.call(f'adb -s {self.id} pull  "{device}data13.bin" "{local}"', shell=True)
+        subprocess.call(f'adb -s {self.id} pull  "{device}data14.bin" "{local}"', shell=True)
+        subprocess.call(f'adb -s {self.id} pull  "{device}data16.bin" "{local}"', shell=True)
 class Nox_devices():
     def __init__(self,*args):
        self.devices=args
