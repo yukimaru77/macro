@@ -3,12 +3,12 @@ from time import sleep
 import random
 import yaml
 #yaml-----------
-with open("config.yaml", "r", encoding="utf-8") as f:
+with open("config.yml", "r", encoding="utf-8") as f:
     data = yaml.load(f, Loader=yaml.SafeLoader)
-kue="monbikue.png"
-genre="normal.png"
-kind="kame"
-difficulty="zixyou.png"
+kue=data["kue"]
+genre=data["genre"]
+kind=data["kind"]
+difficulty=data["difficulty"]
 #yaml-----------
 pre=f"{kind}_p.png"
 mid=f"{kind}_m.png"
@@ -33,7 +33,7 @@ def main():
     others_devices_multi_controller=[Nox_devices(sub_accounts_controller[1],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],main_accounts_controller)]
     start2home(main_accounts_controller)
 
-    for j in range(6,30): #３０回繰り返し
+    for j in range(0,30): #３０回繰り返し
       #サブ垢のアプリデータ入れ替え~ホーム画面まで
       sleep(2)
       sub_multi_controller.chage(i-2,j*3)
@@ -46,10 +46,10 @@ def main():
         kue_select(sub_accounts_controller[k])
 
         #難易度選択~出陣待ち
-        wait_go(sub_accounts_controller[k])
+        wait_go(sub_accounts_controller[k],LINE=True)
 
         #他3垢の参加
-        join(others_devices_multi_controller[k])
+        join(others_devices_multi_controller[k],LINE=True,url=data[f"account{i-2}_{j*3+k}"])
 
         #出陣~クエスト終了
         while not (sub_accounts_controller[k].is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
@@ -65,8 +65,6 @@ def main():
       #アプリを終了
       sub_multi_controller.app_end()
       print(f"終了、i={i}、j={j}")
-
-
 
 
 def is_list(a):
@@ -143,25 +141,39 @@ def kue_select(dev):
       dev.swipe(dev.x,dev.y,dev.x,dev.y+50,750)
   dev.touch()
 
-def wait_go(dev):
+def wait_go(dev,LINE=False):
   dev.img_touch(difficulty,0.9,x2=280,y1=400,y2=900)
   sleep(0.5)
   dev.img_touch("maruti.png",0.9,x1=300,x2=560,y1=350,y2=630)
   sleep(0.5)
-  dev.img_touch("tikaku.png",0.9,x2=200,y1=370,y2=600)
+  if(LINE):
+    dev.img_touch("LINE.png",0.9,x1=200,x2=400,y1=370,y2=600)
+  else:
+    dev.img_touch("tikaku.png",0.9,x2=200,y1=370,y2=600)
   while not (dev.is_img("sixyutugeki.png",0.9,x1=150,x2=430,y1=500,y2=900)):
     pass
   dev.touch()
+  if(LINE):
+    while not (dev.is_img("line_uketuke.png",0.9,x1=210,x2=380,y1=800,y2=870)):
+      pass
+    dev.touch()
 
-def join(dev):
+
+def join(dev,LINE=False,url=""):
+  if(LINE):
+    dev.clear()
+    sleep(2)
+    dev.send_url(url)
   if is_list(dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
     while (False in dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
       dev.img_touch("marutisanka.png",0.9,x1=360,y1=730,y2=830,sleep_time=0)
+      dev.img_touch("saikennsaku.png",0.9,x1=200,y1=720,y2=810,x2=380,sleep_time=0)
       dev.touch(300,350,sleep_time=0)
       dev.touch(300,668,sleep_time=0)
   else:
     while not (dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
       dev.img_touch("marutisanka.png",0.9,x1=360,y1=730,y2=830,sleep_time=0)
+      dev.img_touch("saikennsaku.png",0.9,x1=200,y1=720,y2=810,x2=380,sleep_time=0)
       dev.touch(300,350,sleep_time=0)
       dev.touch(300,668,sleep_time=0)
 
@@ -212,10 +224,5 @@ def clear(dev):
       dev.img_touch("ok_clear.png",0.9,x1=200,x2=390,y1=810,y2=900)
 
 main()
-
-
-
-
-    
 
 
