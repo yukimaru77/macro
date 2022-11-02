@@ -14,18 +14,16 @@ def get_devices_id(*args):
     Nox_Ids=[]
     for i in args:
       subprocess.Popen(f"Nox.exe -clone:Nox_{i}", shell=True)
-      time.sleep(3)#デーモンが起動していない時のadb devicesのエラーを防ぐ。
+      time.sleep(4)#デーモンが起動していない時のadb devicesのエラーを防ぐ。
       proc = subprocess.run("adb devices", shell=True,stdout=PIPE, stderr=PIPE, text=True)
 
       id=proc.stdout.split("\n")[1]
       while id==proc.stdout.split("\n")[1]:
-          print(id)
           proc = subprocess.run("adb devices", shell=True,stdout=PIPE, stderr=PIPE, text=True)
           time.sleep(1)
       id=proc.stdout.split("\n")[1].replace("\tdevice","")
       Nox_Ids.append(id)
       time.sleep(5)
-    print(Nox_Ids)
     return Nox_Ids
 
 class Nox():
@@ -61,6 +59,12 @@ class Nox():
 
     def send_file(self, local_file_path, device_file_path):
         subprocess.call(f'adb -s {self.id} push "{local_file_path}" "{device_file_path}"', shell=True)
+
+    def send_url(self,url):
+      subprocess.run(f"adb -s {self.id} shell am start {url}", shell=True)
+    
+    def clear(self,app="com.android.browser"):
+      subprocess.run(f"adb -s {self.id} shell pm clear com.android.browser", shell=True)
 
     def chage(self,i,j):
         self.send_file(f"C:\\Users\\yukit\\data\\data{i}\\{j}\\data10.bin","/data/data/jp.co.mixi.monsterstrike/")
@@ -149,14 +153,12 @@ class Nox():
               self.x,self.y=[0,0]
               return False"""
     def is_img(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False):
-      print(len(Nox.pics))
-      if  path is not Nox.pics:
+      if  not (path in Nox.pics):
         template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         Nox.pics.update({path : template})
       else:
         template = Nox.pics[path]
-        print("キャッシュ")
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
       subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
       img_rgb = cv2.imread("pictures/"+'screen.png')
@@ -182,14 +184,12 @@ class Nox():
           return False
 
     def img_touch(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False,sleep_time=0.5):
-      print(len(Nox.pics))
-      if  path is not Nox.pics:
+      if  not(path in  Nox.pics):
         template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         Nox.pics.update({path : template})
       else:
         template = Nox.pics[path]
-        print("キャッシュ")
       subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
       subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
       img_rgb = cv2.imread("pictures/"+'screen.png')
@@ -214,10 +214,17 @@ class Nox():
           self.x,self.y=[0,0]
           return False
 
+
 class Nox_devices():
     def __init__(self,*args):
        self.devices=args
-    
+    def clear(self,app="com.android.browser"):
+        for i in self.devices:
+          i.clear(app)
+    def send_url(self,url):
+        for i in self.devices:
+          i.send_url(url)
+  
     def touch(self,x=-100,y=-100,t=60,sleep_time=0.5):
         for i in self.devices:
           i.touch(x,y,t,sleep_time)
