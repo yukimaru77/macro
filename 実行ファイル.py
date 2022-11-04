@@ -1,6 +1,8 @@
 from macro import get_devices_id,Nox_devices,Nox
 from time import sleep 
 import random
+import subprocess
+import schedule
 import yaml
 #yaml-----------
 with open("config.yml", "r", encoding="utf-8") as f:
@@ -33,39 +35,48 @@ def main():
     others_devices_multi_controller=[Nox_devices(sub_accounts_controller[1],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[2],main_accounts_controller),Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],main_accounts_controller)]
     start2home(main_accounts_controller)
 
-    for j in range(0,30): #３０回繰り返し
+    for j in range(0,31): #３1回繰り返し
       #サブ垢のアプリデータ入れ替え~ホーム画面まで
-      sleep(2)
-      sub_multi_controller.chage(i-2,j*3)
-      sleep(1)
-      sub_multi_controller.app_start()
-      start2home(sub_multi_controller)
-      for k in range(3): #クエストを三回繰り返す
+      if((i==3) or ((i==4) and (j<=13))):
         pass
-        #クエスト選択
-        kue_select(sub_accounts_controller[k])
+      else:
+        sleep(2)
+        sub_multi_controller.chage(i-2,j*3)
+        sleep(1)
+        sub_multi_controller.app_start()
+        start2home(sub_multi_controller)
+        for k in range(4): #クエストを三回繰り返す
+          #クエスト選択
+          if(k==3):
+            k=0
+          kue_select(sub_accounts_controller[k])
 
-        #難易度選択~出陣待ち
-        wait_go(sub_accounts_controller[k],LINE=True)
+          #難易度選択~出陣待ち
+          wait_go(sub_accounts_controller[k],LINE=True)
 
-        #他3垢の参加
-        join(others_devices_multi_controller[k],LINE=True,url=data[f"account{i-2}_{j*3+k}"])
+          #他3垢の参加
+          join(others_devices_multi_controller[k],LINE=True,url=data[f"account{i-2}_{j*3+k}"])
 
-        #出陣~クエスト終了
-        while not (sub_accounts_controller[k].is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
-          pass
-        sub_accounts_controller[k].touch(sub_accounts_controller[k].x+210) #スタート
-        sleep(3)
-        sub_accounts_controller[k].touch(180,650) #"はい"があったと時用
-        shot(all_multi_controller) #クエストクリアまで撃つ
+          #出陣~クエスト終了
+          while not (sub_accounts_controller[k].is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
+            pass
+          sub_accounts_controller[k].touch(sub_accounts_controller[k].x+210) #スタート
+          sleep(3)
+          sub_accounts_controller[k].touch(180,650) #"はい"があったと時用
+          shot(all_multi_controller) #クエストクリアまで撃つ
 
-        #ホーム画面まで戻る
-        clear(all_multi_controller)
-      
-      #アプリを終了
-      sub_multi_controller.app_end()
-      print(f"終了、i={i}、j={j}")
+          #ホーム画面まで戻る
+          clear(all_multi_controller)
+        
+        #アプリを終了
+        sub_multi_controller.pull(i-2,j*3)
+        sub_multi_controller.app_end()
+        print(f"終了、i={i}、j={j}")
+    end(i)
 
+def end(i):
+  subprocess.Popen(f"Nox.exe -clone:Nox_{i} -quit", shell=True)
+  sleep(10)
 
 def is_list(a):
   return type(a) is list
@@ -82,7 +93,7 @@ def main_account_start(i):
   return Nox(Noxs[0])
 
 def start2home(dev):
-  if is_list(dev.is_img("home.png",0.9,y1=800)):
+  if is_list(dev.me):
     while (False in dev.is_img("home.png",0.9,y1=800)):
       dev.img_touch("consent.png",0.9,y1=500,sleep_time=0)
       dev.img_touch("ok0.png",0.9,y1=500,x1=100,x2=500,sleep_time=0)
@@ -102,7 +113,7 @@ def start2home(dev):
   dev.touch(50,950)
 
 def kue_select(dev):
-  """if is_list(dev.is_img("home.png",0.9,y1=800)):
+  """if is_list(dev.me):
     while (False in dev.is_img("asobikata.png",0.9,x1=250,y1=150,x2=350,y2=250)):
       dev.img_touch("ok1kai.png",0.9,y1=500,x1=100,x2=500)
       dev.img_touch("kueok.png",0.9,y1=500,x1=100,x2=500)
@@ -156,7 +167,7 @@ def wait_go(dev,LINE=False):
   if(LINE):
     while not (dev.is_img("line_uketuke.png",0.9,x1=210,x2=380,y1=800,y2=870)):
       pass
-    dev.touch()
+    dev.img_touch("line_uketuke.png",0.9,x1=210,x2=380,y1=800,y2=870,center=True)
 
 
 def join(dev,LINE=False,url=""):
@@ -164,7 +175,7 @@ def join(dev,LINE=False,url=""):
     dev.clear()
     sleep(2)
     dev.send_url(url)
-  if is_list(dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
+  if is_list(dev.me):
     while (False in dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
       dev.img_touch("marutisanka.png",0.9,x1=360,y1=730,y2=830,sleep_time=0)
       dev.img_touch("saikennsaku.png",0.9,x1=200,y1=720,y2=810,x2=380,sleep_time=0)
@@ -193,10 +204,9 @@ def decide():
       return([x2-x,y2-y,x2,y2])
 
 def shot(dev):
-  if is_list(dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
+  if is_list(dev.me):
     judge=[False]
     while (False in judge):
-      print(judge)
       judge=[]
       for i in dev.devices:
         j=i.is_img("ok_fin.png",0.9,x1=150,x2=450,y1=500,y2=750)
@@ -214,7 +224,7 @@ def shot(dev):
   dev.touch()
 
 def clear(dev):
-  if is_list(dev.is_img("home.png",0.9,y1=800)):
+  if is_list(dev.me):
     while (False in dev.is_img("home.png",0.9,y1=800)):
       dev.touch(300,450,sleep_time=0)
       dev.img_touch("ok_clear.png",0.9,x1=200,x2=390,y1=810,y2=900)
@@ -223,6 +233,11 @@ def clear(dev):
       dev.touch(300,450,sleep_time=0)
       dev.img_touch("ok_clear.png",0.9,x1=200,x2=390,y1=810,y2=900)
 
+
+"""schedule.every().day.at("04:05").do(main)
+
+while True:
+    schedule.run_pending() #現在時刻が02:22なら一回だけ発火する(2回目以降は無効、実行するとわかるが並列処理ではない)
+    sleep(5)"""
+
 main()
-
-
