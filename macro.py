@@ -19,12 +19,14 @@ def get_devices_id(*args):
 
       id=proc.stdout.split("\n")[1]
       while id==proc.stdout.split("\n")[1]:
+          print(id)
           proc = subprocess.run("adb devices", shell=True,stdout=PIPE, stderr=PIPE, text=True)
           time.sleep(1)
       id=proc.stdout.split("\n")[1].replace("\tdevice","")
       Nox_Ids.append(id)
       time.sleep(5)
     return Nox_Ids
+
 
 class Nox():
     pics={}
@@ -33,6 +35,7 @@ class Nox():
         self.x=0
         self.y=0
         self.cache=0
+        self.me=""
 
     def touch(self,x=-100,y=-100,t=60,sleep_time=0.5):
       if(x==-100):
@@ -215,8 +218,9 @@ class Nox():
           return False
 
     def pull(self,i,j):
-        local="C:\\Users\\yukit\\data_re\\data{i}\\{j}"
+        local=f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\"
         device="/data/data/jp.co.mixi.monsterstrike/"
+        print(f'adb -s {self.id} pull  "{device}data10.bin" "{local}"')
         subprocess.call(f'adb -s {self.id} pull  "{device}data10.bin" "{local}"', shell=True)
         subprocess.call(f'adb -s {self.id} pull  "{device}data11.bin" "{local}"', shell=True)
         subprocess.call(f'adb -s {self.id} pull  "{device}data13.bin" "{local}"', shell=True)
@@ -226,6 +230,7 @@ class Nox():
 class Nox_devices():
     def __init__(self,*args):
        self.devices=args
+       self.me=[]
     def clear(self,app="com.android.browser"):
         for i in self.devices:
           i.clear(app)
