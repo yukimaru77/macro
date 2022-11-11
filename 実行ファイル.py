@@ -25,7 +25,7 @@ def main():
   sub_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2])
   
 
-  for i in range((1+2),6):#本アカ3種類
+  for i in [3,4,5]:#本アカ3種類
     #本アカのNox起動~コントローラーの作成
     main_accounts_controller=main_account_start(i)
 
@@ -37,7 +37,8 @@ def main():
 
     for j in range(0,31): #３1回繰り返し
       #サブ垢のアプリデータ入れ替え~ホーム画面まで
-      if((i==3) or ((i==4) and (j<=13))):
+      #(i==3) or ((i==5) and (j<=20)) or (i==4)
+      if(False) :
         pass
       else:
         sleep(2)
@@ -59,9 +60,7 @@ def main():
 
           #出陣~クエスト終了
           while not (sub_accounts_controller[k].is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
-            pass
-          sub_accounts_controller[k].touch(sub_accounts_controller[k].x+210) #スタート
-          sleep(3)
+            sub_accounts_controller[k].touch(sub_accounts_controller[k].x+210) #スタート
           sub_accounts_controller[k].touch(180,650) #"はい"があったと時用
           shot(all_multi_controller) #クエストクリアまで撃つ
 
@@ -153,20 +152,15 @@ def kue_select(dev):
   dev.touch()
 
 def wait_go(dev,LINE=False):
-  dev.img_touch(difficulty,0.9,x2=280,y1=400,y2=900)
-  sleep(0.5)
-  dev.img_touch("maruti.png",0.9,x1=300,x2=560,y1=350,y2=630)
-  sleep(0.5)
-  if(LINE):
-    dev.img_touch("LINE.png",0.9,x1=200,x2=400,y1=370,y2=600)
-  else:
-    dev.img_touch("tikaku.png",0.9,x2=200,y1=370,y2=600)
-  while not (dev.is_img("sixyutugeki.png",0.9,x1=150,x2=430,y1=500,y2=900)):
-    pass
-  dev.touch()
-  if(LINE):
-    while not (dev.is_img("line_uketuke.png",0.9,x1=210,x2=380,y1=800,y2=870)):
-      pass
+  while not (dev.is_img("LINE.png",0.9,x1=200,x2=400,y1=370,y2=600)):
+    dev.img_touch(difficulty,0.9,x2=280,y1=400,y2=900)
+    dev.img_touch("maruti.png",0.9,x1=300,x2=560,y1=350,y2=630)
+  while not (dev.is_img("torikesi.png",0.9,x2=200,y1=750,y2=900)):
+    if(LINE):
+      dev.img_touch("LINE.png",0.9,x1=200,x2=400,y1=370,y2=600)
+    else:
+      dev.img_touch("tikaku.png",0.9,x2=200,y1=370,y2=600)
+    dev.img_touch("sixyutugeki.png",0.9,x1=150,x2=430,y1=500,y2=900)
     dev.img_touch("line_uketuke.png",0.9,x1=210,x2=380,y1=800,y2=870,center=True)
 
 
@@ -234,9 +228,9 @@ def clear(dev):
       dev.img_touch("ok_clear.png",0.9,x1=200,x2=390,y1=810,y2=900)
 
 
-"""schedule.every().day.at("04:05").do(main)
+schedule.every().day.at("04:05").do(main)
 
-while True:
+"""while True:
     schedule.run_pending() #現在時刻が02:22なら一回だけ発火する(2回目以降は無効、実行するとわかるが並列処理ではない)
     sleep(5)"""
 
