@@ -4,6 +4,7 @@ import random
 import subprocess
 from PIL import Image
 import pyocr
+import copy
 pyocr.tesseract.TESSERACT_CMD = r'C:/Users/yukit/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 tools = pyocr.get_available_tools()
 tool = tools[0]  
@@ -23,16 +24,17 @@ back=f"{kind}_b.png"
 def main():
 
   #3垢起動~各Noxへのコントローラーの作成
-  sub_accounts_controller=sub_account_start()
+  sub_accounts_controller=[Nox('127.0.0.1:62001'),Nox('127.0.0.1:62025'),Nox('127.0.0.1:62026')]
   sub_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2])
 
   for i in range(3,6):#3種類
 
     for j in range(0,31): #３０回繰り返し
-      if(False):
+      if( ((i==4)) or (i==3) or((i==5)and(j<=27))):
         pass
       else:
         #サブ垢のアプリデータ入れ替え~ホーム画面まで
+        gatixya_multi_controller=copy.copy(sub_accounts_controller)
         sleep(2)
         sub_multi_controller.chage(i-2,j*3)
         sleep(1)
@@ -41,24 +43,66 @@ def main():
         sleep(3)
         start2home(sub_multi_controller)
         sleep(3)
-        judge=sub_multi_controller.img_touch("present.png",0.9,x1=490,y1=180,x2=580,y2=270)
-        while (True in judge):
-          for index,TF in enumerate(judge):
-            if (TF):
-              sub_accounts_controller[index].touch(300,300)
-              sub_accounts_controller[index].img_touch("uketori.png",0.9,x1=200,y1=600,x2=400,y2=900)
-              sub_multi_controller.img_touch("ok0.png",0.9,y1=500,x1=100,x2=500,sleep_time=0)
-              if(sub_accounts_controller[index].is_img("sakuzixyo.png",0.9,x1=30,y1=780,x2=190,y2=860)):
-                judge[index]=False
-        sub_multi_controller.touch(50,950)
-        sleep(3)
-        sub_multi_controller.touch(440,950)
+        sub_multi_controller.touch(340,950)
         sleep(3)
         sub_multi_controller.touch(300,610)
         sleep(2)
-        get_monsuto_id(sub_accounts_controller[0],i,j*3)
-        get_monsuto_id(sub_accounts_controller[1],i,j*3+1)
-        get_monsuto_id(sub_accounts_controller[2],i,j*3+2)
+        for k in sub_accounts_controller:
+          k.img_touch("selecet_get_chara.png",0.90)
+          sleep(5)
+          k.touch(400,440)
+          sleep(8)
+          k.touch(510,210)
+          sleep(3)
+          k.touch(450,200)
+          sleep(3)
+          k.touch(300,300)
+          sleep(2)
+          k.touch(300,250)
+          sleep(3)
+          k.touch(400,850)
+          sleep(8)
+          if(k.img_touch("no_a-sa-_sita.png",0.95) ): #アーサー
+            gatixya_multi_controller.remove(k)
+            sleep(3)
+            k.touch(300,440) #木
+            sleep(8)
+            k.touch(100,850)
+            sleep(2)
+            k.touch(200,440) #水
+            sleep(8)
+            k.touch(200,440)
+            sleep(2)
+            k.touch(100,440) #火
+            sleep(8)
+            k.touch(100,550)
+            sleep(2)
+            k.touch(500,440) #闇
+            sleep(8)
+            k.touch(500,440)
+            sleep(2)
+            k.touch(100,680) #決定
+            sleep(8)
+            k.swipe(500,570,500,120,2000)
+            sleep(3)
+            escape=0
+            while (k.is_img("selecet_get_chara.png",0.90)):
+              k.img_touch("10ren.png",0.90)
+              sleep(10)
+              k.touch(300,640)
+              k.touch(300,670)
+              sleep(5)
+              while (k.is_img("10ren.png",0.90)==False):
+                if(k.is_img("nennrei.png",0.90)):
+                  escape=1
+                  break
+                k.swipe(300,730,300,880,1000)
+                k.touch(300,640)
+                k.touch(300,670)
+                k.touch(400,130)
+              if(escape==1):
+                break
+              sleep(10)
         #アプリを終了
         sub_multi_controller.app_end()
   

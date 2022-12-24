@@ -1,38 +1,70 @@
 from macro import get_devices_id,Nox_devices,Nox
 from time import sleep 
 import random
-import yaml
 import subprocess
+import datetime
 import pyocr
 import copy
+import pyautogui
 pyocr.tesseract.TESSERACT_CMD = r'C:/Users/yukit/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 tools = pyocr.get_available_tools()
-tool = tools[0] 
-builder = pyocr.builders.TextBuilder(tesseract_layout=6) 
+tool = tools[0]  
+
+builder = pyocr.builders.TextBuilder(tesseract_layout=6)
+import yaml
 #yaml-----------
-with open("config.yml", "r", encoding="utf-8") as f:
-    data = yaml.load(f, Loader=yaml.SafeLoader)
-kue=data["kue0"]
-genre=data["genre0"]
-kind=data["kind0"]
-difficulty=data["difficulty0"]
+
+kue="monbikue.png"
+genre="normal.png"
+kind="kame"
+difficulty="zixyou.png"
 #yaml-----------
 pre=f"{kind}_p.png"
 mid=f"{kind}_m.png"
 back=f"{kind}_b.png"
 def main():
-    sub_multi_controller=Nox_devices(Nox('127.0.0.1:62001'),Nox('127.0.0.1:62025'),Nox('127.0.0.1:62026'))
-    sub_accounts_controller=[Nox('127.0.0.1:62001'),Nox('127.0.0.1:62025'),Nox('127.0.0.1:62026')]
-    s1=Nox('127.0.0.1:62001')
-    s2=Nox('127.0.0.1:62025')
-    s3=Nox('127.0.0.1:62026')
-    s4=Nox('127.0.0.1:62028')
-    sub_multi_controller2=Nox_devices(Nox('127.0.0.1:62025'),Nox('127.0.0.1:62026'))
-    sub_multi_controller3=Nox_devices(Nox('127.0.0.1:62001'),Nox('127.0.0.1:62025'))
-    #------試したい処理-------
-    kue_select(s1,k=0)
-    wait_go(s1,LINE=True,k=0)
-    #-----------------
+
+  #3垢起動~各Noxへのコントローラーの作成
+  sub_accounts_controller=[Nox('127.0.0.1:62001'),Nox('127.0.0.1:62025'),Nox('127.0.0.1:62026')]
+  sub_multi_controller=Nox_devices(sub_accounts_controller[0],sub_accounts_controller[1],sub_accounts_controller[2])
+  for i in range(3,6):#3種類
+
+    for j in range(0,31): #３０回繰り返し
+      if( ((i==5)and(3<=j<=5)) or ((i==3)and(j<=16))):
+        pass
+      else:
+        #サブ垢のアプリデータ入れ替え~ホーム画面まで
+        sub_multi_controller.chage(i-2,j*3)
+        sleep(1)
+        sub_multi_controller.app_start()
+        start2home(sub_multi_controller)
+        sleep(3)
+        start2home(sub_multi_controller)
+        sleep(3)
+        pyautogui.click(1228,199, button="left")
+        sleep(40)
+        while (not (False in sub_multi_controller.img_touch("off.png",0.9))):#短縮設定
+          sleep(0.2)
+        sub_multi_controller.touch(150,950)
+        sleep(6)
+        pyautogui.click(1228,246, button="left")
+        sleep((54/0.6)+10)
+        pyautogui.click(1228,295, button="left")
+        sleep((191/0.6)+10)
+        sub_accounts_controller[0].screencap(f"/{i-2}-{j*3}-")
+        sub_accounts_controller[1].screencap(f"{i-2}-{j*3+1}-")
+        sub_accounts_controller[2].screencap(f"{i-2}-{j*3+2}-")
+        #アプリを終了
+        sub_multi_controller.pull(i-2,j*3)
+        sub_multi_controller.app_end()
+        base_be = datetime.time(3, 30, 0)
+        base_ad = datetime.time(4, 00, 0)
+        dt_now = datetime.datetime.now()
+        now = dt_now.time()
+        if(base_be<now<base_ad):
+          sleep(((60)-now.minute+10)*60)
+
+
 
 def end(i):
   subprocess.Popen(f"Nox.exe -clone:Nox_{i} -quit", shell=True)
@@ -72,38 +104,37 @@ def start2home(dev):
   sleep(3)
   dev.touch(50,950)
 
-def kue_select(dev,k=0):
-  kue=data[f"kue{k}"]
-  genre=data[f"genre{k}"]
-  kind=data[f"kind{k}"]
-  difficulty=data[f"difficulty{k}"]
-  pre=f"{kind}_p.png"
-  mid=f"{kind}_m.png"
-  back=f"{kind}_b.png"
-  print(data[f"difficulty{k}"])
-  while not (dev.is_img("asobikata.png",0.9)):
-    print("aaaa")
+def kue_select(dev):
+  """if is_list(dev.me):
+    while (False in dev.is_img("asobikata.png",0.9,x1=250,y1=150,x2=350,y2=250)):
+      dev.img_touch("ok1kai.png",0.9,y1=500,x1=100,x2=500)
+      dev.img_touch("kueok.png",0.9,y1=500,x1=100,x2=500)
+      dev.img_touch(genre,0.9,x1=80,y1=520,x2=520,y2=710)
+      dev.img_touch(pre,0.9,y1=160,y2=520)
+      dev.img_touch(mid,0.9,y1=160,y2=520)
+      dev.img_touch(back,0.9,y1=160,y2=520)
+      for i,flag in enumerate(dev.is_img("marutisanka.png",0.9,x1=360,y1=730,y2=830)):
+        if flag:
+          dev.devices[i].touch(dev.devices[i].x-120,dev.devices[i].y)
+    while (False in dev.is_img(kue,0.9,x2=440,y1=250,y2=890)):
+      dev.img_touch("ok1kai.png",0.9,y1=500,x1=100,x2=500)
+      dev.img_touch("kueok.png",0.9,y1=500,x1=100,x2=500)
+      for i,flag in enumerate(dev.is_img("sixyousai.png",0.9,x1=420,y1=400,x2=550,y2=540)):
+        if flag:
+          dev.devices[i].touch(dev.devices[i].x-120,dev.devices[i].y-110)
+      for i,flag in enumerate(dev.is_img("bar.png",0.9,x1=550,y1=150,y2=9305)): #下にスライド
+        if flag:
+          dev.devices[i].swipe(dev.devices[i].x,dev.devices[i].y,dev.devices[i].x,dev.devices[i].y+50,750)
+  else:"""
+  while not (dev.is_img("asobikata.png",0.9,x1=250,y1=150,x2=350,y2=250)):
     dev.img_touch("ok1kai.png",0.9,y1=500,x1=100,x2=500,sleep_time=0)
     dev.img_touch("kueok.png",0.9,y1=500,x1=100,x2=500,sleep_time=0)
     dev.img_touch(genre,0.9,x1=80,y1=520,x2=520,y2=710,sleep_time=0)
     dev.img_touch(pre,0.9,y1=160,y2=520,sleep_time=0)
     dev.img_touch(mid,0.9,y1=160,y2=520,sleep_time=0)
     dev.img_touch(back,0.9,y1=160,y2=520,sleep_time=0)
-    if(kind=="sixyoko"):
-      dev.img_touch("toziru.png",0.9)
     if dev.is_img("marutisanka.png",0.9,x1=360,y1=730,y2=830):
       dev.touch(dev.x-120,dev.y)
-  if(kind=="sixyoko"):
-    print("a")
-    sleep(2)
-    dev.img_touch("toziru.png",0.9)
-    sleep(2)
-    dev.touch(180+80*data["element"],350)
-    sleep(3)
-    dev.touch(434,217,sleep_time=3)
-    dev.touch(289,772,sleep_time=2)
-    dev.touch(280,568-data["sixyoko_diff"]*49,sleep_time=2)
-    dev.touch(445,850,sleep_time=5)
   while not (dev.is_img(kue,0.9,x2=440,y1=250,y2=890)):
     dev.img_touch("ok1kai.png",0.9,y1=500,x1=100,x2=500,sleep_time=0)
     dev.img_touch("kueok.png",0.9,y1=500,x1=100,x2=500,sleep_time=0)
@@ -115,8 +146,8 @@ def kue_select(dev,k=0):
   while not (dev.is_img(difficulty,0.9,x2=280,y1=400,y2=900)):
     dev.img_touch(kue,0.9,x2=440,y1=250,y2=890)
 
-def wait_go(dev,LINE=False,shout=False,k=0):
-  difficulty=data[f"difficulty{k}"]
+
+def wait_go(dev,LINE=False,shout=False):
   if(not shout):
     while not (dev.is_img("LINE.png",0.9,x1=200,x2=400,y1=370,y2=600)):
       dev.img_touch(difficulty,0.9,x2=280,y1=400,y2=900)

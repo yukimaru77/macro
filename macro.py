@@ -16,10 +16,9 @@ def get_devices_id(*args):
       subprocess.Popen(f"Nox.exe -clone:Nox_{i}", shell=True)
       time.sleep(4)#デーモンが起動していない時のadb devicesのエラーを防ぐ。
       proc = subprocess.run("adb devices", shell=True,stdout=PIPE, stderr=PIPE, text=True)
-
       id=proc.stdout.split("\n")[1]
       while id==proc.stdout.split("\n")[1]:
-          print(id)
+          print("a")
           proc = subprocess.run("adb devices", shell=True,stdout=PIPE, stderr=PIPE, text=True)
           time.sleep(1)
       id=proc.stdout.split("\n")[1].replace("\tdevice","")
@@ -37,7 +36,7 @@ class Nox():
         self.cache=0
         self.me=""
 
-    def touch(self,x=-100,y=-100,t=60,sleep_time=0.5):
+    def touch(self,x=-100,y=-100,t=60,sleep_time=0):
       if(x==-100):
         x=self.x
       if(y==-100):
@@ -47,8 +46,7 @@ class Nox():
       time.sleep(sleep_time)
     
     def swipe(self,x1,y1,x2,y2,t):
-
-        subprocess.call(f"adb -s {self.id} shell input touchscreen swipe {x1} {y1} {x2} {y2} {t}", shell=True)
+        subprocess.Popen(f"adb -s {self.id} shell input touchscreen swipe {x1} {y1} {x2} {y2} {t}", shell=True)
 
     def screencap(self,file_name):
         subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/{file_name}{self.id.split(':')[1]}.png", shell=True)
@@ -67,10 +65,15 @@ class Nox():
       subprocess.run(f"adb -s {self.id} shell am start {url}", shell=True)
     
     def clear(self,app="com.android.browser"):
-      subprocess.run(f"adb -s {self.id} shell pm clear com.android.browser", shell=True)
+      proc=subprocess.run(f"adb -s {self.id} shell pm clear com.android.browser", shell=True,stdout=PIPE, stderr=PIPE, text=True)
+      print(proc.stdout)
 
     def chage(self,i,j):
-        self.send_file(f"C:\\Users\\yukit\\data\\data{i}\\{j}\\data10.bin","/data/data/jp.co.mixi.monsterstrike/")
+        self.send_file(f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\data10.bin","/data/data/jp.co.mixi.monsterstrike/")
+        self.send_file(f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\data11.bin","/data/data/jp.co.mixi.monsterstrike/")
+        self.send_file(f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\data13.bin","/data/data/jp.co.mixi.monsterstrike/")
+        self.send_file(f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\data14.bin","/data/data/jp.co.mixi.monsterstrike/")
+        self.send_file(f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\data16.bin","/data/data/jp.co.mixi.monsterstrike/")
     def send_event_from_file(self, path):
         ABS_MT_POSITION_X = 53
         ABS_MT_POSITION_Y = 54
@@ -155,15 +158,16 @@ class Nox():
           else:
               self.x,self.y=[0,0]
               return False"""
-    def is_img(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False):
+    def is_img(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False,cache=False):
       if  not (path in Nox.pics):
         template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         Nox.pics.update({path : template})
       else:
         template = Nox.pics[path]
-      subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
-      subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
+      if(not cache):
+        subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
+        subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
       img_rgb = cv2.imread("pictures/"+'screen.png')
       img_rgb = img_rgb[y1:y2, x1:x2, : ]
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
@@ -171,7 +175,7 @@ class Nox():
 
       res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
       loc = np.where( res >= threshold)
-      #print(np.amax(res)>=threshold)
+      #print(np.amax(res))
       if np.amax(res)>=threshold:
           loc=np.where(res==np.amax(res))[::-1]
           for pt in zip(*loc):
@@ -186,15 +190,16 @@ class Nox():
           self.x,self.y=[0,0]
           return False
 
-    def img_touch(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False,sleep_time=0.5):
+    def img_touch(self,path,threshold,x1=0,y1=0,x2=599,y2=999,center=False,sleep_time=0.5,cache=False):
       if  not(path in  Nox.pics):
         template = cv2.imread("pictures/"+path)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         Nox.pics.update({path : template})
       else:
         template = Nox.pics[path]
-      subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
-      subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
+      if(not cache):
+        subprocess.call(f"adb -s {self.id} shell screencap -p /sdcard/screen.png", shell=True)
+        subprocess.call(f"adb -s {self.id} pull /sdcard/screen.png pictures/", shell=True)
       img_rgb = cv2.imread("pictures/"+'screen.png')
       img_rgb = img_rgb[y1:y2, x1:x2, : ]
       img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
@@ -218,7 +223,7 @@ class Nox():
           return False
 
     def pull(self,i,j):
-        local=f"C:\\Users\\yukit\\data_re\\data{i}\\{j}\\"
+        local=f"C:\\Users\\yukit\\data_re\\data{i}\\{j}"
         device="/data/data/jp.co.mixi.monsterstrike/"
         print(f'adb -s {self.id} pull  "{device}data10.bin" "{local}"')
         subprocess.call(f'adb -s {self.id} pull  "{device}data10.bin" "{local}"', shell=True)
@@ -244,6 +249,7 @@ class Nox_devices():
     def swipe(self,x1,y1,x2,y2,t):
         for i in self.devices:
           i.swipe(x1,y1,x2,y2,t)
+        time.sleep(t/2000)
     def screencap(self,file_name):
         for i in self.devices:
           i.screencap(file_name)
@@ -262,7 +268,7 @@ class Nox_devices():
           j=j+1 #binをずらす
     def pull(self,i,j):      
         for k in self.devices:
-          k.chage(i,j)
+          k.pull(i,j)
           j=j+1 #binをずらす
     def send_event_from_file(self, path):
         for i in self.devices:
@@ -275,5 +281,6 @@ class Nox_devices():
     def img_touch(self,path,threshold,x1=0,y1=0,x2=600,y2=1001,center=False,sleep_time=0.5):
         check=[]
         for i in self.devices:
-          check.append(i.img_touch(path,threshold,x1,y1,x2,y2,center,sleep_time))
+          check.append(i.img_touch(path,threshold,x1,y1,x2,y2,center,sleep_time=0))
+        time.sleep(sleep_time)
         return check   
